@@ -48,8 +48,8 @@ def check_proximity(user_loc: UserLocation):
     }
 
 # Endpoint to toggle God Mode during  presentation
-@app.post("/admin/toggle-god-mode")
-def toggle_god_mode(enabled: bool):
+@app.post("/toggle-god-mode")
+def toggle_god_mode(enable: bool):
     global GOD_MODE
-    GOD_MODE = enabled
-    return {"status": f"God Mode is now {GOD_MODE}"}
+    GOD_MODE = enable
+    return {"status": "success", "god_mode": GOD_MODE}
