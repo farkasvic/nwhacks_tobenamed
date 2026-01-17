@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>App Name</title>
+    <title>CityQuest</title>
     <style>
       body {
         font-family: sans-serif;
@@ -48,6 +48,26 @@
         cursor: pointer;
         transform: scale(1.05);
       }
+
+      /* God Mode Button Style */
+      #god-mode-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background-color: #ffc107; /* Yellow warning color */
+        color: white;
+        border-radius: 50%;
+        font-size: 20px;
+        padding: 0;
+        cursor: pointer;
+        opacity: 0.3; /* Mostly invisible */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      #god-mode-btn:hover {
+        opacity: 1; /* Fully visible on hover */
+      }
     </style>
   </head>
   <body>
@@ -62,6 +82,8 @@
         📸 FOUND IT
       </button>
     </div>
+
+    <button id="god-mode-btn" onclick="toggleGodMode()">⚡️</button>
 
     <script>
       // 1. Get GPS from Browser
@@ -111,6 +133,23 @@
       function showError(error) {
         document.getElementById("status").innerText =
           "GPS Error: " + error.message;
+      }
+
+      // GOD MODE FUNCTION
+      async function toggleGodMode() {
+        try {
+          // Toggles on/off (you can adjust the logic if you want strict On/Off)
+          const response = await fetch("/toggle-god-mode?enable=true", {
+            method: "POST",
+          });
+          const data = await response.json();
+          alert("God Mode Enabled: You can now verify anywhere.");
+
+          // Force an immediate update so the button turns blue instantly
+          updateLocation();
+        } catch (error) {
+          console.error("God Mode failed:", error);
+        }
       }
 
       // Run loop every 2 seconds
