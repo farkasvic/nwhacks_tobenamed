@@ -1,159 +1,35 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CityQuest</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        text-align: center;
-        padding: 20px;
-        background: #f0f2f5;
-      }
-      .card {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-      h1 {
-        font-size: 24px;
-        margin-bottom: 10px;
-      }
-      #status {
-        font-weight: bold;
-        color: #666;
-      }
-      #distance {
-        font-size: 48px;
-        color: #333;
-        display: block;
-        margin: 20px 0;
-      }
 
-      button {
-        background-color: #ccc;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 20px;
-        border-radius: 50px;
-        cursor: not-allowed;
-        width: 100%;
-        transition: 0.3s;
-      }
-      button.active {
-        background-color: #007bff;
-        cursor: pointer;
-        transform: scale(1.05);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityQuest</title>
+  <link rel='stylesheet' href='/static/style.css' />
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_SY-hHyH0FqMRqEv1VKa0gV1b4bqPrDk&libraries=places&v=weekly"
+    async></script>
 
-      /* God Mode Button Style */
-      #god-mode-btn {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 40px;
-        height: 40px;
-        background-color: #ffc107; /* Yellow warning color */
-        color: white;
-        border-radius: 50%;
-        font-size: 20px;
-        padding: 0;
-        cursor: pointer;
-        opacity: 0.3; /* Mostly invisible */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      }
-      #god-mode-btn:hover {
-        opacity: 1; /* Fully visible on hover */
-      }
-    </style>
-  </head>
-  <body>
-    <div class="card">
-      <h1>Current Objective</h1>
-      <p>Find the <b style="color: #d63384">Clock Tower</b></p>
+</head>
 
-      <span id="distance">--- m</span>
-      <p id="status">Waiting for GPS...</p>
+<body>
+  <div id="map"></div>
 
-      <button id="cam-btn" onclick="alert('Camera logic goes here!')">
-        📸 FOUND IT
-      </button>
-    </div>
+  <div class="card">
+    <h1>Current Objective</h1>
+    <p>Find the <b style="color: #d63384">Clock Tower</b></p>
 
-    <button id="god-mode-btn" onclick="toggleGodMode()">⚡️</button>
+    <span id="distance">--- m</span>
+    <p id="status">Waiting for GPS...</p>
 
-    <script>
-      // 1. Get GPS from Browser
-      function updateLocation() {
-        if (!navigator.geolocation) {
-          document.getElementById("status").innerText = "GPS not supported";
-          return;
-        }
+    <button id="cam-btn" onclick="alert('Camera logic goes here!')">
+      📸 FOUND IT
+    </button>
+  </div>
 
-        navigator.geolocation.getCurrentPosition(sendPosition, showError, {
-          enableHighAccuracy: true,
-        });
-      }
+  <button id="god-mode-btn" onclick="toggleGodMode()">⚡️</button>
 
-      // 2. Send GPS to Python Backend
-      async function sendPosition(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
+  <script src="/static/app.js"></script>
+</body>
 
-        try {
-          const response = await fetch("/check-proximity", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lat: lat, lon: lon }),
-          });
-
-          const data = await response.json();
-
-          // 3. Update UI based on Python response
-          document.getElementById("distance").innerText =
-            Math.round(data.distance_remaining) + " m";
-          document.getElementById("status").innerText = data.message;
-
-          const btn = document.getElementById("cam-btn");
-          if (data.can_verify) {
-            btn.classList.add("active");
-            btn.disabled = false;
-          } else {
-            btn.classList.remove("active");
-            btn.disabled = true;
-          }
-        } catch (error) {
-          console.error("Error talking to Python:", error);
-        }
-      }
-
-      function showError(error) {
-        document.getElementById("status").innerText =
-          "GPS Error: " + error.message;
-      }
-
-      // GOD MODE FUNCTION
-      async function toggleGodMode() {
-        try {
-          // Toggles on/off (you can adjust the logic if you want strict On/Off)
-          const response = await fetch("/toggle-god-mode?enable=true", {
-            method: "POST",
-          });
-          const data = await response.json();
-          alert("God Mode Enabled: You can now verify anywhere.");
-
-          // Force an immediate update so the button turns blue instantly
-          updateLocation();
-        } catch (error) {
-          console.error("God Mode failed:", error);
-        }
-      }
-
-      // Run loop every 2 seconds
-      setInterval(updateLocation, 2000);
-    </script>
-  </body>
 </html>

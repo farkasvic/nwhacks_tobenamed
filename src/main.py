@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles 
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from .geocalc import calculate_distance
+import requests
 
 app = FastAPI()
 
@@ -10,6 +11,7 @@ app = FastAPI()
 TARGET_POI = {"lat": 49.2606, "lon": -123.2460} # Sample coordinates, rn UBC clock tower
 UNLOCK_RADIUS_METERS = 50 #50 m within target
 GOD_MODE = False # For demo purposes, will say we are close to target if True
+GOOGLE_API_KEY = "AIzaSyC_SY-hHyH0FqMRqEv1VKa0gV1b4bqPrDk"
 
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
@@ -53,3 +55,26 @@ def toggle_god_mode(enable: bool):
     global GOD_MODE
     GOD_MODE = enable
     return {"status": "success", "god_mode": GOD_MODE}
+
+@app.get("/get-landmarks")
+def get_landmarks(
+    lat: float = Query(...),
+    lng: float = Query(...),
+    radius: int = Query(2000),
+    types: str = Query("tourist_attraction|point_of_interest|museum|park|restaurant")
+):
+    """
+    Returns nearby landmarks using Google Places REST API.
+    """
+    url = (
+        f"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+        f"?location={lat},{lng}&radius={radius}&type={types}&key={GOOGLE_API_KEY}"
+    )
+
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+        data = r.json()
+        return data
+    except requests.RequestException as e:
+        return {"error": str(e)}
