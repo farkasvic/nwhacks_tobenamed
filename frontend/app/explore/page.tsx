@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
-import { Menu, Loader2 } from "lucide-react";
+import { Menu, Loader2, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import { NavItem } from "@/components/nav-item";
 import { CategoryCard } from "@/components/category-card";
@@ -27,6 +27,8 @@ export default function ExplorePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [locationCount, setLocationCount] = useState(3);
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
@@ -244,7 +246,7 @@ export default function ExplorePage() {
         <Button
           size="icon"
           onClick={() => setIsCategoryDialogOpen(true)}
-          className="h-20 w-20 rounded-full bg-white hover:bg-[#b6efd4] shadow-2xl shadow-[#7bc950]/50 transition-all hover:scale-110 active:scale-95 p-0"
+          className="h-20 w-20 rounded-full bg-white hover:bg-white shadow-2xl shadow-[#7bc950]/50 transition-all hover:scale-110 active:scale-95 p-0"
         >
           <Image 
             src="/play.svg" 
@@ -255,62 +257,110 @@ export default function ExplorePage() {
           />
           <span className="sr-only">Start quest</span>
         </Button>
-        <p className="text-center mt-3 text-sm font-medium text-white drop-shadow-lg">
-          Start Quest
-        </p>
       </div>
 
       {/* Category Selection Drawer */}
-      <Drawer open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+      <Drawer open={isCategoryDialogOpen} onOpenChange={(open) => {
+        setIsCategoryDialogOpen(open);
+        if (!open) {
+          setSelectedCategory(null);
+          setLocationCount(3);
+        }
+      }}>
         <DrawerContent className="h-[85vh]">
-          <div className="bg-[#7bc950] px-6 py-4">
-            <DrawerTitle className="text-2xl font-bold text-white">Choose Your Quest Category</DrawerTitle>
-            <DrawerDescription className="text-sm text-white/90 mt-1">Select a category to start discovering locations nearby</DrawerDescription>
-          </div>
-          <div className="p-6 overflow-y-auto flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <CategoryCard
-                title="Restaurants"
-                image="/category_photo/restaurant.jpg"
-                onSelect={() => {
-                  console.log("Selected: Restaurants");
-                  setIsCategoryDialogOpen(false);
-                }}
-              />
-              <CategoryCard
-                title="Parks & Nature"
-                image="/category_photo/park.jpg"
-                onSelect={() => {
-                  console.log("Selected: Parks");
-                  setIsCategoryDialogOpen(false);
-                }}
-              />
-              <CategoryCard
-                title="Attractions"
-                image="/category_photo/attraction.jpg"
-                onSelect={() => {
-                  console.log("Selected: Attractions");
-                  setIsCategoryDialogOpen(false);
-                }}
-              />
-              <CategoryCard
-                title="Landmarks"
-                image="/category_photo/landmark.jpg"
-                onSelect={() => {
-                  console.log("Selected: Landmarks");
-                  setIsCategoryDialogOpen(false);
-                }}
-              />
-              <CategoryCard
-                title="Cafes & Coffee"
-                image="/category_photo/cafe.jpg"
-                onSelect={() => {
-                  console.log("Selected: Cafes");
-                  setIsCategoryDialogOpen(false);
-                }}
-              />
-            </div>
-          </div>
+          {!selectedCategory ? (
+            // Step 1: Category Selection
+            <>
+              <div className="bg-[#7bc950] px-6 py-4">
+                <DrawerTitle className="text-2xl font-bold text-white">Choose Your Quest Category</DrawerTitle>
+                <DrawerDescription className="text-sm text-white/90 mt-1">Select a category to start discovering locations nearby</DrawerDescription>
+              </div>
+              <div className="p-6 overflow-y-auto flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <CategoryCard
+                    title="Restaurants"
+                    image="/category_photo/restaurant.jpg"
+                    onSelect={() => setSelectedCategory("Restaurants")}
+                  />
+                  <CategoryCard
+                    title="Parks & Nature"
+                    image="/category_photo/park.jpg"
+                    onSelect={() => setSelectedCategory("Parks & Nature")}
+                  />
+                  <CategoryCard
+                    title="Attractions"
+                    image="/category_photo/attraction.jpg"
+                    onSelect={() => setSelectedCategory("Attractions")}
+                  />
+                  <CategoryCard
+                    title="Landmarks"
+                    image="/category_photo/landmark.jpg"
+                    onSelect={() => setSelectedCategory("Landmarks")}
+                  />
+                  <CategoryCard
+                    title="Cafes & Coffee"
+                    image="/category_photo/cafe.jpg"
+                    onSelect={() => setSelectedCategory("Cafes & Coffee")}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            // Step 2: Location Count Selection
+            <>
+              <div className="bg-[#7bc950] px-6 py-4">
+                <DrawerTitle className="text-2xl font-bold text-white">How Many Locations?</DrawerTitle>
+                <DrawerDescription className="text-sm text-white/90 mt-1">Choose how many {selectedCategory.toLowerCase()} to discover</DrawerDescription>
+              </div>
+              <div className="p-6 flex flex-col items-center justify-center flex-1 gap-8">
+                <div className="flex items-center gap-6">
+                  <Button
+                    size="icon"
+                    onClick={() => setLocationCount(Math.max(1, locationCount - 1))}
+                    disabled={locationCount <= 1}
+                    className="h-16 w-16 rounded-full bg-[#7bc950] hover:bg-[#7ce577] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Minus className="h-8 w-8" />
+                  </Button>
+                  
+                  <div className="text-center">
+                    <div className="text-7xl font-bold text-[#7bc950]">{locationCount}</div>
+                    <p className="text-sm text-zinc-600 mt-2">Location{locationCount !== 1 ? 's' : ''}</p>
+                  </div>
+                  
+                  <Button
+                    size="icon"
+                    onClick={() => setLocationCount(Math.min(5, locationCount + 1))}
+                    disabled={locationCount >= 5}
+                    className="h-16 w-16 rounded-full bg-[#7bc950] hover:bg-[#7ce577] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="h-8 w-8" />
+                  </Button>
+                </div>
+                
+                <div className="flex gap-3 w-full max-w-md">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedCategory(null)}
+                    className="flex-1 border-[#7bc950] text-[#7bc950] hover:bg-[#b6efd4]/20"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      console.log(`Starting quest: ${selectedCategory}, ${locationCount} locations`);
+                      setIsCategoryDialogOpen(false);
+                      setSelectedCategory(null);
+                      setLocationCount(3);
+                    }}
+                    className="flex-1 bg-[#7bc950] hover:bg-[#7ce577] text-white"
+                  >
+                    Start Quest
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </DrawerContent>
       </Drawer>
     </div>
