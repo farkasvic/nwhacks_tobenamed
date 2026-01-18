@@ -37,6 +37,7 @@ export default function ExplorePage() {
   const [currentRiddleIndex, setCurrentRiddleIndex] = useState(0);
   const [solvedRiddles, setSolvedRiddles] = useState<Set<number>>(new Set());
   const [locations, setLocations] = useState<Array<{name: string, description: string, image: string}>>([]);
+  const [questLocations, setQuestLocations] = useState<Array<{lat: number, lng: number}>>([]);
   const [isQuestCompleteOpen, setIsQuestCompleteOpen] = useState(false);
   const [questStats, setQuestStats] = useState({ steps: 0, stamps: 0, exp: 0 });
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
@@ -44,6 +45,7 @@ export default function ExplorePage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const questMarkersRef = useRef<google.maps.Marker[]>([]);
 
   // Test backend connection
   // useEffect(() => {
@@ -163,6 +165,13 @@ export default function ExplorePage() {
       if (quests.length === 0) {
         throw new Error("No quests were created. Please try again.");
       }
+      
+      // Store quest coordinates for map markers
+      const questCoords = quests.map((q: any) => ({
+        lat: q.location.lat,
+        lng: q.location.lng
+      }));
+      setQuestLocations(questCoords);
       
       // Generate locations array from quests
       const questLocations = quests.map((q: any) => ({
@@ -365,6 +374,40 @@ export default function ExplorePage() {
 
     initMap();
   }, []);
+
+  // Display quest location markers on the map
+  useEffect(() => {
+    if (!googleMapRef.current || !isQuestActive || questLocations.length === 0) {
+      return;
+    }
+
+    // Clear existing quest markers
+    questMarkersRef.current.forEach(marker => marker.setMap(null));
+    questMarkersRef.current = [];
+
+    // Create circle markers for each quest location
+    questLocations.forEach((coords, index) => {
+      const circle = new google.maps.Circle({
+        strokeColor: solvedRiddles.has(index) ? '#7bc950' : '#FFA500',
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
+        fillColor: solvedRiddles.has(index) ? '#7bc950' : '#FFA500',
+        fillOpacity: 0.4,
+        map: googleMapRef.current,
+        center: { lat: coords.lat, lng: coords.lng },
+        radius: 100, // 100 meters radius
+      });
+
+      // Store the circle in the markers ref (they work the same way)
+      questMarkersRef.current.push(circle as any);
+    });
+
+    // Cleanup function
+    return () => {
+      questMarkersRef.current.forEach(marker => marker.setMap(null));
+      questMarkersRef.current = [];
+    };
+  }, [isQuestActive, questLocations, locations, solvedRiddles]);
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
