@@ -260,11 +260,9 @@ export default function ExplorePage() {
           <SheetContent side="left" className="w-[280px] bg-white dark:bg-zinc-900 p-0 [&>button]:text-white [&>button]:hover:text-white/80">
             <SheetHeader className="sr-only">
               <SheetTitle>Navigation Menu</SheetTitle>
-              <SheetDescription>Navigate your adventure</SheetDescription>
             </SheetHeader>
             <div className="bg-[#7bc950] p-6">
               <h2 className="text-xl font-semibold text-white">Menu</h2>
-              <p className="text-sm text-white/90 mt-1">Navigate your adventure</p>
             </div>
             <div className="p-6 flex flex-col gap-2">
               <NavItem label="Home" onClick={() => setIsMenuOpen(false)} />
