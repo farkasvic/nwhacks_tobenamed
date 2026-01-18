@@ -68,7 +68,7 @@ users_collection = db["users"]
 
 # Game Constants
 UNLOCK_RADIUS_METERS = 50
-GOD_MODE = True 
+GOD_MODE = False  # Set to True for testing without location/AI verification
 
 BADGE_RULES = {
     "Ranger": {"category": "Park", "count": 3},
@@ -100,7 +100,7 @@ class ImageRequest(BaseModel):
     image_b64: str
     lat: float
     lon: float
-    
+    force_god_mode: bool = False
 
 # --- SESSION HELPERS ---
 def load_game_state():
@@ -141,39 +141,51 @@ def advance_quest_stage(game_data):
 
 # --- DATABASE HELPERS ---
 def get_current_user():
-    user = users_collection.find_one({"_id": "demo_user"})
-    if not user:
-        user = {"_id": "demo_user", "stamps": [], "badges": []}
-        users_collection.insert_one(user)
-    return user
+    try:
+        user = users_collection.find_one({"_id": "demo_user"})
+        if not user:
+            user = {"_id": "demo_user", "stamps": [], "badges": []}
+            users_collection.insert_one(user)
+        return user
+    except Exception as e:
+        print(f"⚠️ MongoDB Error: {e}")
+        # Return mock user if DB fails
+        return {"_id": "demo_user", "stamps": [], "badges": []}
 
 def update_user_data(user_data):
-    users_collection.replace_one({"_id": "demo_user"}, user_data)
+    try:
+        users_collection.replace_one({"_id": "demo_user"}, user_data)
+    except Exception as e:
+        print(f"⚠️ MongoDB Error: {e}")
 
 def process_stamp_logic(poi_name, category):
-    user = get_current_user()
-    for s in user["stamps"]:
-        if s["name"] == poi_name:
-            return {"success": True, "message": "Stamp already collected!", "new_badge": None}
+    try:
+        user = get_current_user()
+        for s in user["stamps"]:
+            if s["name"] == poi_name:
+                return {"success": True, "message": "Stamp already collected!", "new_badge": None}
 
-    new_stamp = {
-        "name": poi_name,
+        new_stamp = {
+            "name": poi_name,
         "category": category,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
     }
-    user["stamps"].append(new_stamp)
-    
-    new_badge = None
-    count = sum(1 for s in user["stamps"] if s["category"] == category)
-    
-    for badge_name, rule in BADGE_RULES.items():
-        if rule["category"] == category and count == rule["count"]:
-            if badge_name not in user["badges"]:
-                user["badges"].append(badge_name)
-                new_badge = badge_name
+        user["stamps"].append(new_stamp)
+        
+        new_badge = None
+        count = sum(1 for s in user["stamps"] if s["category"] == category)
+        
+        for badge_name, rule in BADGE_RULES.items():
+            if rule["category"] == category and count == rule["count"]:
+                if badge_name not in user["badges"]:
+                    user["badges"].append(badge_name)
+                    new_badge = badge_name
 
-    update_user_data(user)
-    return {"success": True, "message": "Stamp Collected!", "new_badge": new_badge}
+        update_user_data(user)
+        return {"success": True, "message": "Stamp Collected!", "new_badge": new_badge}
+    except Exception as e:
+        print(f"⚠️ Error in stamp logic: {e}")
+        return {"success": True, "message": "Location verified! (Stamps temporarily unavailable)", "new_badge": None}
 
 
 # --- ROUTES ---
@@ -350,14 +362,11 @@ def verify_image(req: ImageRequest):
     target_lat = active_quest["location"]["lat"]
     target_lon = active_quest["location"]["lng"]
 
-    # 3. Location Check (With God Mode)
-    dist = calculate_distance(req.lat, req.lon, target_lat, target_lon)
+    # 3. Location Check - Removed, users can take photos from anywhere
+    # Users can now verify from any location - only AI checks the photo
     
     # Check both Global God Mode AND the phone's request flag
-    is_god_mode = GOD_MODE or req.force_god_mode
-
-    if dist > UNLOCK_RADIUS_METERS and not is_god_mode:
-        return {"success": False, "message": f"Too far! Get closer to {active_quest['name']}."}
+    is_god_mode = GOD_MODE or getattr(req, 'force_god_mode', False)
 
     # 4. AI Verification
     success = False

@@ -8,7 +8,7 @@ import Image from "next/image";
 import { NavItem } from "@/components/nav-item";
 import { CategoryCard } from "@/components/category-card";
 import { QuestCompleteDialog } from "@/components/quest-complete-dialog";
-import { getCurrentSession, startSession, getLandmarks, getRiddle, generateAllRiddles } from "@/lib/api";
+import { getCurrentSession, startSession, getLandmarks, getRiddle, generateAllRiddles, verifyImage } from "@/lib/api";
 import {
   Sheet,
   SheetContent,
@@ -231,14 +231,34 @@ export default function ExplorePage() {
     cameraInputRef.current?.click();
   };
 
-  const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // TODO: Process the captured photo (send to Gemini Vision API for verification)
-      console.log("Photo captured:", file);
-      // For now, mark the current riddle as solved
-      setSolvedRiddles(prev => new Set([...prev, currentRiddleIndex]));
-      // Later, this will verify the location and only mark as solved if verified
+    if (!file || !userLocation) return;
+
+    try {
+      console.log("📸 Photo captured, verifying...");
+      
+      // Call the verify-image endpoint
+      const result = await verifyImage(file, userLocation.lat, userLocation.lng);
+      
+      if (result.success) {
+        console.log("✅ Location verified!");
+        
+        // Mark riddle as solved
+        setSolvedRiddles(prev => new Set([...prev, currentRiddleIndex]));
+        
+        // Show badge notification if awarded
+        if (result.new_badge) {
+          console.log(`🎖️ New badge earned: ${result.new_badge}`);
+          // You can add a toast notification here
+        }
+      } else {
+        console.log("❌ Verification failed:", result.message);
+        alert(result.message || "That doesn't look like the right place. Try again!");
+      }
+    } catch (error) {
+      console.error("Error verifying photo:", error);
+      alert("Failed to verify photo. Please try again.");
     }
   };
 
