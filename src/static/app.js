@@ -107,21 +107,21 @@ function showError(error) {
 }
 
 // GOD MODE FUNCTION
-async function toggleGodMode() {
-  try {
-    // Toggles on/off (you can adjust the logic if you want strict On/Off)
-    const response = await fetch("/toggle-god-mode?enable=true", {
-      method: "POST",
-    });
-    const data = await response.json();
-    alert("God Mode Enabled: You can now verify anywhere.");
+// async function toggleGodMode() {
+//   try {
+//     // Toggles on/off (you can adjust the logic if you want strict On/Off)
+//     const response = await fetch("/toggle-god-mode?enable=true", {
+//       method: "POST",
+//     });
+//     const data = await response.json();
+//     alert("God Mode Enabled: You can now verify anywhere.");
 
-    // Force an immediate update so the button turns blue instantly
-    updateLocation();
-  } catch (error) {
-    console.error("God Mode failed:", error);
-  }
-}
+//     // Force an immediate update so the button turns blue instantly
+//     updateLocation();
+//   } catch (error) {
+//     console.error("God Mode failed:", error);
+//   }
+// }
 
 // 4️⃣ Fetch landmarks using REST API
 async function getRandomLandmarks(

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SightQuest</title>
+    <link rel='stylesheet' href='/static/style.css' />
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_SY-hHyH0FqMRqEv1VKa0gV1b4bqPrDk&libraries=places&v=weekly"
+        async></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <select id="category">
+        <option value="Park">🏞️ Park</option>
+        <option value="History" selected>🏛️ History</option>
+        <option value="Food">🍔 Food</option>
+    </select>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
