@@ -35,7 +35,7 @@ users_collection = db["users"]
 
 TARGET_POI = {
     "lat": 49.2666, 
-    "lon": 123.2499, 
+    "lon": -123.2494, 
     "name": "UBC Blue Chip", 
     "category": "Food"
 } 

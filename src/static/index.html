@@ -434,12 +434,24 @@
       // --- INIT ---
       document.addEventListener("DOMContentLoaded", () => {
         loadProfile();
-        updateLocation();
         loadRiddle();
+        startTracking(); // <--- New Function Call
       });
 
-      // Start GPS loop
-      setInterval(updateLocation, 2000);
+      // New "Real-Time" Tracker
+      function startTracking() {
+        if (!navigator.geolocation) {
+          document.getElementById("status").innerText = "GPS not supported";
+          return;
+        }
+
+        // watchPosition fires EVERY time the phone detects movement
+        navigator.geolocation.watchPosition(sendPosition, showError, {
+          enableHighAccuracy: true, // Forces phone to use GPS (not just Wifi)
+          maximumAge: 0, // Don't use cached old positions
+          timeout: 5000, // If signal is lost, retry quickly
+        });
+      }
     </script>
   </body>
 </html>
