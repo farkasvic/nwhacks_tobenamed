@@ -7,15 +7,16 @@ import warnings
 from datetime import datetime
 from google import genai
 from google.genai import types 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles 
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pymongo import MongoClient
 
 from .geocalc import calculate_distance 
-
+import requests
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 app = FastAPI()
 
@@ -69,6 +70,15 @@ BADGE_RULES = {
     "Historian": {"category": "History", "count": 3},
     "Foodie": {"category": "Food", "count": 3}
 }
+
+CATEGORY_KEYWORDS = {
+    "Park": "park garden trail",
+    "History": "tourist_attraction point_of_interest art_gallery historic monument church",
+    "Food": "restaurant cafe bakery food"
+}
+
+
+GOOGLE_API_KEY = "AIzaSyC_SY-hHyH0FqMRqEv1VKa0gV1b4bqPrDk"
 
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
@@ -135,7 +145,7 @@ def process_stamp_logic(poi_name, category):
 
 @app.get("/")
 async def read_index():
-    return FileResponse('src/static/index.html')
+    return FileResponse('src/static/index2.html')
 
 @app.get("/get-riddle")
 def get_riddle():
@@ -290,6 +300,31 @@ def toggle_god_mode(enable: bool):
     GOD_MODE = enable
     return {"status": "success", "god_mode": GOD_MODE}
 
+
+@app.get("/get-landmarks")
+def get_landmarks(
+    lat: float = Query(...),
+    lng: float = Query(...),
+    radius: int = Query(2000),
+    category: str = Query("Park")
+):
+    keyword = CATEGORY_KEYWORDS.get(category, "tourist attraction")
+
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+    params = {
+        "location": f"{lat},{lng}",
+        "radius": radius,
+        "keyword": keyword,
+        "key": GOOGLE_API_KEY,
+    }
+
+    try:
+        r = requests.get(url, params=params)
+        r.raise_for_status()
+        return r.json()
+    except requests.RequestException as e:
+        return {"error": str(e)}
+        
 @app.post("/collect-stamp")
 def collect_stamp(stamp: StampRequest):
     # Simplified to use the helper function
