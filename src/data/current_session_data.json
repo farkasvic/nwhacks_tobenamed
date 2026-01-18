@@ -1,28 +1,28 @@
 {
   "session": {
-    "huntId": "hunt_1768755279",
+    "huntId": "hunt_1768759553",
     "startLocation": {
-      "lat": 49.262243463260226,
-      "lng": -123.24522895897142
+      "lat": 49.26208006825034,
+      "lng": -123.24539415209091
     },
     "radiusMeters": 2000,
-    "category": "Cafe",
+    "category": "Food",
     "currentQuestIndex": 0,
     "totalPoints": 0,
-    "startedAt": "2026-01-18T16:54:39.565596Z",
-    "updatedAt": "2026-01-18T16:54:39.565596Z"
+    "startedAt": "2026-01-18T18:05:53.416937Z",
+    "updatedAt": "2026-01-18T18:05:53.416937Z"
   },
   "quests": [
     {
       "id": "quest_1",
-      "sessionId": "hunt_1768755279",
-      "name": "Blue Chip Cafe",
+      "sessionId": "hunt_1768759553",
+      "name": "Browns Crafthouse UBC",
       "location": {
-        "lat": 49.266614,
-        "lng": -123.2498741
+        "lat": 49.2661875,
+        "lng": -123.2488395
       },
-      "category": "Cafe",
-      "riddle": "Where roasted scents begin to call,\nAnd murmurs mingle off the wall,\nBeneath a structure standing tall,\nYou'll find your solace, lest you fall.",
+      "category": "Food",
+      "riddle": "Where frothing glasses catch the light,\nBeyond the Great Nest, shining bright,\nFor hunger's plea and thirst's delight,\nSeek out this haven, just in sight!",
       "status": "active",
       "points": 100,
       "order": 1,
@@ -30,14 +30,14 @@
     },
     {
       "id": "quest_2",
-      "sessionId": "hunt_1768755279",
-      "name": "Bean Around The World Coffee House & Bistro",
+      "sessionId": "hunt_1768759553",
+      "name": "Sports Illustrated Clubhouse",
       "location": {
-        "lat": 49.2588643,
-        "lng": -123.2480615
+        "lat": 49.2542486,
+        "lng": -123.2357293
       },
-      "category": "Cafe",
-      "riddle": null,
+      "category": "Food",
+      "riddle": "Where legends' triumphs light the **wall**,\nAnd hunger's ancient spirit will **call**,\nA haven where heroic deeds enthrall,\nAnd ample plates await you **all**.",
       "status": "locked",
       "points": 100,
       "order": 2,
@@ -45,32 +45,17 @@
     },
     {
       "id": "quest_3",
-      "sessionId": "hunt_1768755279",
-      "name": "Starbucks",
+      "sessionId": "hunt_1768759553",
+      "name": "Kyros Kitchen",
       "location": {
-        "lat": 49.25469,
-        "lng": -123.23651
+        "lat": 49.266614,
+        "lng": -123.2498741
       },
-      "category": "Cafe",
-      "riddle": null,
+      "category": "Food",
+      "riddle": "Where hungry bellies seek a warm **embrace**,\nAnd savory scents fill every open **space**,\nBeneath grand archways, where wisdom finds its **grace**,\nDiscover comfort at a quickened **pace**.",
       "status": "locked",
       "points": 100,
       "order": 3,
-      "awardedPoints": 0
-    },
-    {
-      "id": "quest_4",
-      "sessionId": "hunt_1768755279",
-      "name": "The Mighty Oak @ the Well Cafe",
-      "location": {
-        "lat": 49.265648,
-        "lng": -123.244093
-      },
-      "category": "Cafe",
-      "riddle": null,
-      "status": "locked",
-      "points": 100,
-      "order": 4,
       "awardedPoints": 0
     }
   ]
